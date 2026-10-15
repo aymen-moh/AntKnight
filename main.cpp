@@ -5,8 +5,11 @@
 #include <raymath.h>
 /////////////////////////////// Textures
 Texture2D bg_sp_sheet;
-Texture2D play_button_sheet;
-Texture2D quit_button_sheet;
+Texture2D play_button;
+Texture2D play_button_h;
+Texture2D quit_button;
+Texture2D quit_button_h;
+
 /////////////////////////////// COLORS
 const Color TRANSPARENT_WHITE = {1, 1, 1, 25};
 ///////////////////////////////
@@ -21,9 +24,9 @@ Gamestate gameState;
 Rectangle anim(Texture2D sheet, int frames, float anim_speed){
     static int currentframe = 0;
     static float elapsed = 0;
-    static Texture2D frame = sheet;
+    Texture2D frame = sheet;
     float ft = GetFrameTime();
-    static float frame_width = (float)sheet.width / frames;
+    float frame_width = (float)sheet.width / frames;
     elapsed += ft;
     if(elapsed >= anim_speed) {
         currentframe++;
@@ -45,11 +48,13 @@ int main(int argc, char* argv[]){
     SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 
     bg_sp_sheet = LoadTexture("Assets/Texture/gui/bg_texture.png");
-    play_button_sheet = LoadTexture("Assets/Texture/gui/resume_button.png");
-    quit_button_sheet = LoadTexture("Assets/Texture/gui/quit_button.png");
+    play_button = LoadTexture("Assets/Texture/gui/play_button.png");
+    play_button_h = LoadTexture("Assets/Texture/gui/play_button_h.png");
+    quit_button = LoadTexture("Assets/Texture/gui/quit_button.png");
+    quit_button_h = LoadTexture("Assets/Texture/gui/quit_button_h.png");
 
-    Rectangle play_button_rect = {400, 400, 64, 64};
-    Rectangle quit_button_rect = {450, 250, 64, 64};
+    Rectangle play_button_rect = {500, 250, 64, 64};
+    Rectangle quit_button_rect = {350, 250, 64, 64};
     //////////////////////////////MAIN LOOP//////////////////////////////////
     while(!WindowShouldClose()){
         ////////////////////////// Repeating variables
@@ -61,9 +66,12 @@ int main(int argc, char* argv[]){
         switch(gameState){
             case main_menu: {
                 ClearBackground(BLACK);
-                DrawTexturePro(bg_sp_sheet, anim(bg_sp_sheet, 2, 0.6), {0, 0, width, height}, {0, 0}, 0, WHITE);
-                DrawTexturePro(play_button_sheet, CheckCollisionPointRec(mouse_pos, play_button_rect) ? next_frame(play_button_sheet, 2) : (Rectangle){0, 0, 32, 32}, play_button_rect, {0, 0}, 0, WHITE);
-                DrawTexturePro(quit_button_sheet, CheckCollisionPointRec(mouse_pos, quit_button_rect) ? next_frame(quit_button_sheet, 2) : (Rectangle){0, 0, 32, 32}, quit_button_rect, {0, 0}, 0, WHITE);
+                Texture2D current_quit = CheckCollisionPointRec(mouse_pos, quit_button_rect) ? current_quit = quit_button_h : current_quit = quit_button;                
+                Texture2D current_quit = CheckCollisionPointRec(mouse_pos, play_button_rect) ? play_button_h :play_button;                
+                DrawTexturePro(bg_sp_sheet, anim(bg_sp_sheet, 2, 1.2), {0, 0, width, height}, {0, 0}, 0, WHITE);
+                DrawTexturePro(CheckCollisionPointRec(mouse_pos, play_button_rect) ? play_button_h : play_button, {0, 0, 16, 16}, play_button_rect, {0, 0}, 0, WHITE);
+                
+                DrawTexturePro(CheckCollisionPointRec(mouse_pos, quit_button_rect) ? quit_button_h : quit_button, anim(current_quit, 2, 1.2), quit_button_rect, {0, 0}, 0, WHITE);
             }
         }
         if(IsCursorOnScreen())DrawCircle(mouse_pos.x, mouse_pos.y, 30, TRANSPARENT_WHITE);
@@ -72,8 +80,10 @@ int main(int argc, char* argv[]){
         
     }
     //////////////////////////////End Of Loop////////////////////////////////
-    UnloadTexture(quit_button_sheet);
-    UnloadTexture(play_button_sheet);
+    UnloadTexture(quit_button);
+    UnloadTexture(quit_button_h);
+    UnloadTexture(play_button);
+    UnloadTexture(play_button_h);
     UnloadTexture(bg_sp_sheet);
     CloseWindow();
 }
