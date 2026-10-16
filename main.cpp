@@ -8,6 +8,7 @@
 /////////////////////////////// Textures
 Texture2D bg_sp_sheet;
 Texture2D play_button;
+Texture2D bg_lvl;
 Texture2D play_button_h;
 Texture2D quit_button;
 Texture2D quit_button_h;
@@ -15,6 +16,8 @@ Texture2D menu_button;
 Texture2D menu_button_h;
 Texture2D lvlbg_texture;
 Texture2D logo;
+
+Texture2D player_idle;
 /////////////////////////////// COLORS
 const Color TRANSPARENT_WHITE = {255, 255, 255, 25};
 /////////////////////////////// Booleans
@@ -38,19 +41,21 @@ struct move {
         return EaseCubicInOut(elapsed, start, end - start, time);
     }
 };
-///////////////////////////////
-enum Gamestate{
-    main_menu,
-};
-Gamestate gameState;
-Rectangle anim(Texture2D sheet, int frames, float anim_speed){
+
+struct anima{
+    int frames;
+    float speed;
+    float elapsed = 0;
+    float current_anim;
+
+    Rectangle anim(Texture2D sheet){
     static int currentframe = 0;
     static float elapsed = 0;
     Texture2D frame = sheet;
     float ft = GetFrameTime();
     float frame_width = (float)sheet.width / frames;
     elapsed += ft;
-    if(elapsed >= anim_speed) {
+    if(elapsed >= speed) {
         currentframe++;
         if (currentframe > frames - 1) currentframe = 0;
         
@@ -58,6 +63,18 @@ Rectangle anim(Texture2D sheet, int frames, float anim_speed){
     }
     return {currentframe * frame_width  , 0.0f, frame_width, sheet.height};
 }
+    
+};
+///////////////////////////////
+enum PlayerState{
+    idle
+};
+enum Gamestate{
+    main_menu,
+    game
+};
+Gamestate gameState;
+
 Rectangle next_frame(Texture2D sheet, int frames){
     return {(float)sheet.width / frames, 0, sheet.width / frames, sheet.height};
 }
@@ -87,11 +104,11 @@ int main(int argc, char* argv[]){
     menu_button = LoadTexture("Assets/Texture/gui/menu_button.png");
     menu_button_h = LoadTexture("Assets/Texture/gui/menu_button_h.png");
     logo = LoadTexture("Assets/Texture/gui/logo.png");
-
+    bg_lvl = LoadTexture("Assets/Texture/textures/lvl_bg.png");
     Rectangle play_button_rect = {500, 250, 64, 64};
     Rectangle quit_button_rect = {350, 250, 64, 64};
     Rectangle menu_button_rect = {425, 250, 64, 64};
-    Rectangle logor = {100, 60, 760, 128};
+    Rectangle logor = {100, 60, 760, 150};
 
     move play_button_move = {1060, 500, 1.5};
     move quit_button_move = {-100, 350, 1.5};
@@ -121,10 +138,15 @@ int main(int argc, char* argv[]){
 
                 DrawTexturePro(bg_sp_sheet, anim(bg_sp_sheet, 2, 2.4), {0, 0, width, height}, {0, 0}, 0, WHITE);
                 DrawTexturePro(current_play, anim(current_play, 2, 2.4), play_button_rect, {0, 0}, 0, WHITE);
+                if(hovered(mouse_pos, play_button_rect) and left_click) gameState = game;
                 DrawTexturePro(current_menu, anim(current_menu, 2, 2.4), menu_button_rect, {0, 0}, 0, WHITE);
                 DrawTexturePro(hovered(mouse_pos, quit_button_rect) ? quit_button_h : quit_button, anim(current_quit, 2, 2.4), quit_button_rect, {0, 0}, 0, WHITE);
                 if(hovered(mouse_pos, quit_button_rect) and left_click) quit = true;
                 DrawTexturePro(logo, {0, 0, 256, 64}, logor, {0, 0}, 0, WHITE);
+                break;
+            }
+            case game: {
+                DrawTexturePro(bg_lvl, {0, 0, 160, 90}, {0, 0, 960, 540}, {0, 0}, 0, WHITE);
                 break;
             }
         };
@@ -147,6 +169,5 @@ int main(int argc, char* argv[]){
     UnloadTexture(play_button_h);
     UnloadTexture(menu_button);
     UnloadTexture(menu_button_h);
-    UnloadTexture(logo);
-    CloseWindow();
+    UnloadTexture(logo);        CloseWindow();
 }
