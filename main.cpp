@@ -12,8 +12,23 @@ Texture2D quit_button_h;
 Texture2D menu_button;
 Texture2D menu_button_h;
 /////////////////////////////// COLORS
-const Color TRANSPARENT_WHITE = {1, 1, 1, 25};
+const Color TRANSPARENT_WHITE = {255, 255, 255, 25};
 ///////////////////////////////
+struct move {
+    float start, end, time;
+    float elapsed = 0;
+    bool playing = true;
+    
+    float update(){
+        if(playing){
+            elapsed += GetFrameTime();
+            elapsed = Clamp(elapsed, 0, time);
+            
+        }
+        float t = elapsed / time;
+        return Lerp(start, end, t);
+    }
+};
 ///////////////////////////////
 enum Gamestate{
     main_menu,
@@ -59,6 +74,9 @@ int main(int argc, char* argv[]){
     Rectangle play_button_rect = {500, 250, 64, 64};
     Rectangle quit_button_rect = {350, 250, 64, 64};
     Rectangle menu_button_rect = {425, 250, 64, 64};
+    move play_button_move = {-100, 500, 1.5};
+    move quit_button_move = {-100, 350, 1.5};
+    move menu_button_move = {-100, 425, 1.5};
     //////////////////////////////MAIN LOOP//////////////////////////////////
     while(!WindowShouldClose()){
         ////////////////////////// Repeating variables
@@ -73,7 +91,11 @@ int main(int argc, char* argv[]){
                 Texture2D current_quit = CheckCollisionPointRec(mouse_pos, quit_button_rect) ? quit_button_h : quit_button;
                 Texture2D current_play = CheckCollisionPointRec(mouse_pos, play_button_rect) ? play_button_h : play_button;
                 Texture2D current_menu = CheckCollisionPointRec(mouse_pos, menu_button_rect) ? menu_button_h : menu_button;
-                menu_button_rect = {lerp(-100, 425, 1), menu_button_rect.y, menu_button_rect.width, menu_button_rect.height};
+                
+                quit_button_rect.x = quit_button_move.update();
+                play_button_rect.x = play_button_move.update();
+                menu_button_rect.x = menu_button_move.update();
+
                 DrawTexturePro(bg_sp_sheet, anim(bg_sp_sheet, 2, 2.4), {0, 0, width, height}, {0, 0}, 0, WHITE);
                 DrawTexturePro(current_play, anim(current_play, 2, 2.4), play_button_rect, {0, 0}, 0, WHITE);
                 DrawTexturePro(current_menu, anim(current_menu, 2, 2.4), menu_button_rect, {0, 0}, 0, WHITE);
