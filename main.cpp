@@ -9,13 +9,11 @@ Texture2D play_button;
 Texture2D play_button_h;
 Texture2D quit_button;
 Texture2D quit_button_h;
-
+Texture2D menu_button;
+Texture2D menu_button_h;
 /////////////////////////////// COLORS
 const Color TRANSPARENT_WHITE = {1, 1, 1, 25};
 ///////////////////////////////
-Rectangle next_frame(Texture2D sheet, int frames){
-    return {(float)sheet.width / frames, 0, sheet.width / frames, sheet.height};
-}
 ///////////////////////////////
 enum Gamestate{
     main_menu,
@@ -36,6 +34,9 @@ Rectangle anim(Texture2D sheet, int frames, float anim_speed){
     }
     return {currentframe * frame_width  , 0.0f, frame_width, sheet.height};
 }
+Rectangle next_frame(Texture2D sheet, int frames){
+    return {(float)sheet.width / frames, 0, sheet.width / frames, sheet.height};
+}
 
 int main(int argc, char* argv[]){
     ////////////////////////////VARIABLES////////////////////////////////////
@@ -52,9 +53,12 @@ int main(int argc, char* argv[]){
     play_button_h = LoadTexture("Assets/Texture/gui/play_button_h.png");
     quit_button = LoadTexture("Assets/Texture/gui/quit_button.png");
     quit_button_h = LoadTexture("Assets/Texture/gui/quit_button_h.png");
+    menu_button = LoadTexture("Assets/Texture/gui/menu_button.png");
+    menu_button_h = LoadTexture("Assets/Texture/gui/menu_button_h.png");
 
     Rectangle play_button_rect = {500, 250, 64, 64};
     Rectangle quit_button_rect = {350, 250, 64, 64};
+    Rectangle menu_button_rect = {425, 250, 64, 64};
     //////////////////////////////MAIN LOOP//////////////////////////////////
     while(!WindowShouldClose()){
         ////////////////////////// Repeating variables
@@ -66,14 +70,16 @@ int main(int argc, char* argv[]){
         switch(gameState){
             case main_menu: {
                 ClearBackground(BLACK);
-                Texture2D current_quit = CheckCollisionPointRec(mouse_pos, quit_button_rect) ? current_quit = quit_button_h : current_quit = quit_button;                
-                Texture2D current_quit = CheckCollisionPointRec(mouse_pos, play_button_rect) ? play_button_h :play_button;                
-                DrawTexturePro(bg_sp_sheet, anim(bg_sp_sheet, 2, 1.2), {0, 0, width, height}, {0, 0}, 0, WHITE);
-                DrawTexturePro(CheckCollisionPointRec(mouse_pos, play_button_rect) ? play_button_h : play_button, {0, 0, 16, 16}, play_button_rect, {0, 0}, 0, WHITE);
-                
-                DrawTexturePro(CheckCollisionPointRec(mouse_pos, quit_button_rect) ? quit_button_h : quit_button, anim(current_quit, 2, 1.2), quit_button_rect, {0, 0}, 0, WHITE);
+                Texture2D current_quit = CheckCollisionPointRec(mouse_pos, quit_button_rect) ? quit_button_h : quit_button;
+                Texture2D current_play = CheckCollisionPointRec(mouse_pos, play_button_rect) ? play_button_h : play_button;
+                Texture2D current_menu = CheckCollisionPointRec(mouse_pos, menu_button_rect) ? menu_button_h : menu_button;
+                menu_button_rect = {lerp(-100, 425, 1), menu_button_rect.y, menu_button_rect.width, menu_button_rect.height};
+                DrawTexturePro(bg_sp_sheet, anim(bg_sp_sheet, 2, 2.4), {0, 0, width, height}, {0, 0}, 0, WHITE);
+                DrawTexturePro(current_play, anim(current_play, 2, 2.4), play_button_rect, {0, 0}, 0, WHITE);
+                DrawTexturePro(current_menu, anim(current_menu, 2, 2.4), menu_button_rect, {0, 0}, 0, WHITE);
+                DrawTexturePro(CheckCollisionPointRec(mouse_pos, quit_button_rect) ? quit_button_h : quit_button, anim(current_quit, 2, 2.4), quit_button_rect, {0, 0}, 0, WHITE);
             }
-        }
+        };
         if(IsCursorOnScreen())DrawCircle(mouse_pos.x, mouse_pos.y, 30, TRANSPARENT_WHITE);
         //////////////////////////
         EndDrawing();
@@ -85,5 +91,9 @@ int main(int argc, char* argv[]){
     UnloadTexture(play_button);
     UnloadTexture(play_button_h);
     UnloadTexture(bg_sp_sheet);
+    UnloadTexture(play_button);
+    UnloadTexture(play_button_h);
+    UnloadTexture(menu_button);
+    UnloadTexture(menu_button_h);
     CloseWindow();
 }
