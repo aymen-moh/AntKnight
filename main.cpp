@@ -49,21 +49,25 @@ struct anima{
     float current_anim;
 
     Rectangle anim(Texture2D sheet){
-    static int currentframe = 0;
-    static float elapsed = 0;
+    
     Texture2D frame = sheet;
     float ft = GetFrameTime();
     float frame_width = (float)sheet.width / frames;
     elapsed += ft;
     if(elapsed >= speed) {
-        currentframe++;
-        if (currentframe > frames - 1) currentframe = 0;
+        current_anim++;
+        if (current_anim > frames - 1) current_anim = 0;
         
         elapsed = 0;
     }
-    return {currentframe * frame_width  , 0.0f, frame_width, sheet.height};
+    return {current_anim * frame_width  , 0.0f, frame_width, sheet.height};
 }
     
+};
+
+struct Player{
+    Rectangle player;
+    float speed;    
 };
 ///////////////////////////////
 enum PlayerState{
@@ -83,6 +87,10 @@ Rectangle next_frame(Texture2D sheet, int frames){
 bool hovered(Vector2 mouse, Rectangle rect){
     if (CheckCollisionPointRec(mouse, rect)) return true;
     else return false;
+}
+void move_player(){
+    bool not_on_ground = CheckCollision
+    if
 }
 
 int main(int argc, char* argv[]){
@@ -114,6 +122,12 @@ int main(int argc, char* argv[]){
     move quit_button_move = {-100, 350, 1.5};
     move menu_button_move = {600, 250, 1.5};
     move mm_logo = {-100, 50, 1};
+
+    anima x2f_1_1 = {2, 0.5};
+    anima x2f_1_2 = {2, 0.5};
+    anima x2f_1_3 = {2, 0.5};
+    anima x2f_1_4 = {2, 0.5};
+    
     //////////////////////////////MAIN LOOP//////////////////////////////////
     while(!WindowShouldClose() and !quit){
         ////////////////////////// Repeating variables
@@ -135,12 +149,12 @@ int main(int argc, char* argv[]){
                 play_button_rect.x = play_button_move.update();
                 menu_button_rect.y = menu_button_move.update();
                 logor.y = mm_logo.update();
-
-                DrawTexturePro(bg_sp_sheet, anim(bg_sp_sheet, 2, 2.4), {0, 0, width, height}, {0, 0}, 0, WHITE);
-                DrawTexturePro(current_play, anim(current_play, 2, 2.4), play_button_rect, {0, 0}, 0, WHITE);
+                
+                DrawTexturePro(bg_sp_sheet, x2f_1_1.anim(bg_sp_sheet), {0, 0, width, height}, {0, 0}, 0, WHITE);
+                DrawTexturePro(current_play, x2f_1_2.anim(current_play), play_button_rect, {0, 0}, 0, WHITE);
                 if(hovered(mouse_pos, play_button_rect) and left_click) gameState = game;
-                DrawTexturePro(current_menu, anim(current_menu, 2, 2.4), menu_button_rect, {0, 0}, 0, WHITE);
-                DrawTexturePro(hovered(mouse_pos, quit_button_rect) ? quit_button_h : quit_button, anim(current_quit, 2, 2.4), quit_button_rect, {0, 0}, 0, WHITE);
+                DrawTexturePro(current_menu, x2f_1_3.anim(current_menu), menu_button_rect, {0, 0}, 0, WHITE);
+                DrawTexturePro(hovered(mouse_pos, quit_button_rect) ? quit_button_h : quit_button, x2f_1_4.anim(current_quit), quit_button_rect, {0, 0}, 0, WHITE);
                 if(hovered(mouse_pos, quit_button_rect) and left_click) quit = true;
                 DrawTexturePro(logo, {0, 0, 256, 64}, logor, {0, 0}, 0, WHITE);
                 break;
