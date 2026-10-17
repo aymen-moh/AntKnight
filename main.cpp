@@ -17,14 +17,17 @@ Texture2D menu_button_h;
 Texture2D lvlbg_texture;
 Texture2D logo;
 
-Texture2D player_idle;
-Texture2D player_running;
+Texture2D player_idle_left;
+Texture2D player_idle_right;
+Texture2D player_running_left;
+Texture2D player_running_right;
 /////////////////////////////// COLORS
 const Color TRANSPARENT_WHITE = {255, 255, 255, 25};
 /////////////////////////////// Booleans
 bool quit = false;
 
-////////////////////////////////
+//////////////////////////////// ints
+int y_vel = 0;
 struct move {
     float start, end, time;
     float elapsed = 0;
@@ -66,6 +69,7 @@ struct anima{
 
 struct Player{
     Rectangle player;
+    Rectangle hitbox;
     float speed = 180;
     float y_vel; 
 };
@@ -94,18 +98,29 @@ bool hovered(Vector2 mouse, Rectangle rect){
 
 void move_player(){
     static anima player_idle_anima = {2, 0.5};
-    static anima player_running_anima = {3, 0.33};
+    static anima player_running_anima = {4, 0.1};
     float ft = GetFrameTime();
-    if(IsKeyDown(KEY_D)) {player.player.x += player.speed * ft; player_state = running;}
-    if(IsKeyDown(KEY_A)) {player.player.x -= player.speed * ft; player_state = running;}
+    static bool direction = true;
+    if(IsKeyDown(KEY_D)) {player.player.x += player.speed * ft; player_state = running; direction = true;}
+    if(IsKeyDown(KEY_A)) {player.player.x -= player.speed * ft; player_state = running; direction = false;}
     if(IsKeyUp(KEY_A) and IsKeyUp(KEY_D) or IsKeyDown(KEY_A) and IsKeyDown(KEY_D)) player_state = idle;
+    if(y_vel == 0) if(IsKeyPressed(KEY_SPACE)) y_vel = 10;
+    player.player.y -= y_vel;
+    y_vel -= 0.01;
+    if(!CheckCollisionRecs(player.player, {0, 510, 960, 40})) y_vel = -5;
+    
+    DrawRectangle(0, 500, 960, 40, GREEN);
+    DrawRectangle(0, 510, 960, 40, LIME);
     switch(player_state){
         case idle: {
-            DrawTexturePro(player_idle, player_idle_anima.anim(player_idle), player.player, {0, 0}, 0, WHITE);
+            Texture2D current_idle = direction ? player_idle_right : player_idle_left;
+            DrawTexturePro(current_idle, player_idle_anima.anim(current_idle), player.player, {0, 0}, 0, WHITE);
             break;
         }
         case running: {
-            DrawTexturePro(player_running, player_running_anima.anim(player_running), player.player, {0, 0}, 0, WHITE);
+            Texture2D current_running = direction ? player_running_right : player_running_left;
+            DrawTexturePro(current_running, player_running_anima.anim(current_running), player.player, {0, 0}, 0, WHITE);
+            break;
         }
     }
 }
@@ -129,17 +144,18 @@ int main(int argc, char* argv[]){
     menu_button = LoadTexture("Assets/Texture/gui/menu_button.png");
     menu_button_h = LoadTexture("Assets/Texture/gui/menu_button_h.png");
     logo = LoadTexture("Assets/Texture/gui/logo.png");
-    bg_lvl = LoadTexture("Assets/Texture/textures/lvl_bg.png");
+    bg_lvl = LoadTexture("Assets/Texture/textures/lvl_bg.png"); 
 
-    player_idle = LoadTexture("Assets/Texture/entities/player/player_idle.png");
-    player_running = LoadTexture("Assets/Texture/entities/player/player_running.png");
-
+    player_idle_left = LoadTexture("Assets/Texture/entities/player/player_idle_left.png");
+    player_idle_right = LoadTexture("Assets/Texture/entities/player/player_idle_right.png");
+    player_running_left = LoadTexture("Assets/Texture/entities/player/player_running_left.png");
+    player_running_right = LoadTexture("Assets/Texture/entities/player/player_running_right.png");
     Rectangle play_button_rect = {500, 250, 64, 64};
     Rectangle quit_button_rect = {350, 250, 64, 64};
     Rectangle menu_button_rect = {425, 250, 64, 64};
     Rectangle logor = {100, 60, 760, 150};
 
-    player.player = {width / 2, height / 2, 64, 64};
+    player.player = {width / 2, height / 2, 96, 96};
 
     move play_button_move = {1060, 500, 1.5};
     move quit_button_move = {-100, 350, 1.5};
@@ -157,6 +173,7 @@ int main(int argc, char* argv[]){
         Vector2 mouse_pos = GetMousePosition();
         float ft = GetFrameTime();
         bool left_click = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+        player.hitbox = {player.player.x + 39, player.player.y + 14, 20, 85};
         //////////////////////////
         BeginDrawing();
         //////////////////////////
@@ -188,8 +205,11 @@ int main(int argc, char* argv[]){
                 break;
             }
         };
+        
+        DrawRectangleLines(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height, RED);
         if(IsCursorOnScreen())DrawCircle(mouse_pos.x, mouse_pos.y, 30, TRANSPARENT_WHITE);
         //////////////////////////
+
         std::string mx = std::to_string((int)GetMousePosition().x);
         std::string my = std::to_string((int)GetMousePosition().y);
         DrawText(mx.c_str(), 50, 50, 28, BLACK);
