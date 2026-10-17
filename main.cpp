@@ -18,12 +18,11 @@ Texture2D lvlbg_texture;
 Texture2D logo;
 
 Texture2D player_idle;
+Texture2D player_running;
 /////////////////////////////// COLORS
 const Color TRANSPARENT_WHITE = {255, 255, 255, 25};
 /////////////////////////////// Booleans
 bool quit = false;
-
-
 
 ////////////////////////////////
 struct move {
@@ -67,12 +66,16 @@ struct anima{
 
 struct Player{
     Rectangle player;
-    float speed;    
+    float speed = 180;
+    float y_vel; 
 };
+Player player;
 ///////////////////////////////
 enum PlayerState{
-    idle
+    idle,
+    running
 };
+PlayerState player_state;
 enum Gamestate{
     main_menu,
     game
@@ -88,9 +91,23 @@ bool hovered(Vector2 mouse, Rectangle rect){
     if (CheckCollisionPointRec(mouse, rect)) return true;
     else return false;
 }
+
 void move_player(){
-    bool not_on_ground = CheckCollision
-    if
+    static anima player_idle_anima = {2, 0.5};
+    static anima player_running_anima = {3, 0.33};
+    float ft = GetFrameTime();
+    if(IsKeyDown(KEY_D)) {player.player.x += player.speed * ft; player_state = running;}
+    if(IsKeyDown(KEY_A)) {player.player.x -= player.speed * ft; player_state = running;}
+    if(IsKeyUp(KEY_A) and IsKeyUp(KEY_D) or IsKeyDown(KEY_A) and IsKeyDown(KEY_D)) player_state = idle;
+    switch(player_state){
+        case idle: {
+            DrawTexturePro(player_idle, player_idle_anima.anim(player_idle), player.player, {0, 0}, 0, WHITE);
+            break;
+        }
+        case running: {
+            DrawTexturePro(player_running, player_running_anima.anim(player_running), player.player, {0, 0}, 0, WHITE);
+        }
+    }
 }
 
 int main(int argc, char* argv[]){
@@ -113,10 +130,16 @@ int main(int argc, char* argv[]){
     menu_button_h = LoadTexture("Assets/Texture/gui/menu_button_h.png");
     logo = LoadTexture("Assets/Texture/gui/logo.png");
     bg_lvl = LoadTexture("Assets/Texture/textures/lvl_bg.png");
+
+    player_idle = LoadTexture("Assets/Texture/entities/player/player_idle.png");
+    player_running = LoadTexture("Assets/Texture/entities/player/player_running.png");
+
     Rectangle play_button_rect = {500, 250, 64, 64};
     Rectangle quit_button_rect = {350, 250, 64, 64};
     Rectangle menu_button_rect = {425, 250, 64, 64};
     Rectangle logor = {100, 60, 760, 150};
+
+    player.player = {width / 2, height / 2, 64, 64};
 
     move play_button_move = {1060, 500, 1.5};
     move quit_button_move = {-100, 350, 1.5};
@@ -161,6 +184,7 @@ int main(int argc, char* argv[]){
             }
             case game: {
                 DrawTexturePro(bg_lvl, {0, 0, 160, 90}, {0, 0, 960, 540}, {0, 0}, 0, WHITE);
+                move_player();
                 break;
             }
         };
