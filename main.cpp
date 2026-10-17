@@ -5,6 +5,15 @@
 #include <raymath.h>
 #include "reasings.h"
 
+struct block{
+    Rectangle rect;
+};
+
+std::vector<block> lvl1{
+    {0, 500, 960, 540},
+    {900, 430, 60, 20}
+}
+
 /////////////////////////////// Textures
 Texture2D bg_sp_sheet;
 Texture2D play_button;
@@ -26,8 +35,8 @@ const Color TRANSPARENT_WHITE = {255, 255, 255, 25};
 /////////////////////////////// Booleans
 bool quit = false;
 
-//////////////////////////////// ints
-int y_vel = 0;
+//////////////////////////////// floats
+float y_vel = 0;
 struct move {
     float start, end, time;
     float elapsed = 0;
@@ -70,7 +79,7 @@ struct anima{
 struct Player{
     Rectangle player;
     Rectangle hitbox;
-    float speed = 180;
+    float speed = 240;
     float y_vel; 
 };
 Player player;
@@ -104,10 +113,11 @@ void move_player(){
     if(IsKeyDown(KEY_D)) {player.player.x += player.speed * ft; player_state = running; direction = true;}
     if(IsKeyDown(KEY_A)) {player.player.x -= player.speed * ft; player_state = running; direction = false;}
     if(IsKeyUp(KEY_A) and IsKeyUp(KEY_D) or IsKeyDown(KEY_A) and IsKeyDown(KEY_D)) player_state = idle;
-    if(y_vel == 0) if(IsKeyPressed(KEY_SPACE)) y_vel = 10;
+    if(y_vel == 0) if(IsKeyPressed(KEY_SPACE)) y_vel = 800 * ft;
     player.player.y -= y_vel;
     y_vel -= 0.01;
-    if(!CheckCollisionRecs(player.player, {0, 510, 960, 40})) y_vel = -5;
+    if(!CheckCollisionRecs(player.player, {0, 510, 960, 40})) y_vel -= 0.6;
+    else y_vel = 0;
     
     DrawRectangle(0, 500, 960, 40, GREEN);
     DrawRectangle(0, 510, 960, 40, LIME);
