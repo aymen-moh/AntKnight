@@ -12,7 +12,7 @@ struct block{
 std::vector<block> lvl1{
     {0, 500, 960, 540},
     {900, 430, 60, 20}
-}
+};
 
 /////////////////////////////// Textures
 Texture2D bg_sp_sheet;
@@ -80,7 +80,9 @@ struct Player{
     Rectangle player;
     Rectangle hitbox;
     float speed = 240;
-    float y_vel; 
+    float jump_vel = 800;
+    float y_vel;
+    float gravity = 60;
 };
 Player player;
 ///////////////////////////////
@@ -106,17 +108,17 @@ bool hovered(Vector2 mouse, Rectangle rect){
 }
 
 void move_player(){
-    static anima player_idle_anima = {2, 0.5};
+    static anima player_idle_anima = {4, 0.5};
     static anima player_running_anima = {4, 0.1};
     float ft = GetFrameTime();
     static bool direction = true;
     if(IsKeyDown(KEY_D)) {player.player.x += player.speed * ft; player_state = running; direction = true;}
     if(IsKeyDown(KEY_A)) {player.player.x -= player.speed * ft; player_state = running; direction = false;}
     if(IsKeyUp(KEY_A) and IsKeyUp(KEY_D) or IsKeyDown(KEY_A) and IsKeyDown(KEY_D)) player_state = idle;
-    if(y_vel == 0) if(IsKeyPressed(KEY_SPACE)) y_vel = 800 * ft;
+    if(y_vel == 0) if(IsKeyPressed(KEY_SPACE)) y_vel = player.jump_vel * ft;
     player.player.y -= y_vel;
-    y_vel -= 0.01;
-    if(!CheckCollisionRecs(player.player, {0, 510, 960, 40})) y_vel -= 0.6;
+
+    if(!CheckCollisionRecs(player.player, {0, 510, 960, 40})) y_vel -= player.gravity * ft;
     else y_vel = 0;
     
     DrawRectangle(0, 500, 960, 40, GREEN);
