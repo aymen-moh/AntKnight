@@ -173,6 +173,7 @@ void draw_joystick(Vector2 Position){
     move mknoby = {knob.y, Position.y, 0.03};
     DrawCircleV(Position, 50, c001);
     DrawCircleV({knob.x, knob.y}, 18, c002);
+    DrawCircleV()
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) and CheckCollisionPointCircle(mp, knob, 18) and !drag){
         if (distance < 50) knob = mp;
         drag = true;
