@@ -163,22 +163,26 @@ void draw_joystick(Vector2 Position){
     Vector2 md = GetMouseDelta();
     static bool knob_can_move;
     static bool drag = false;
+    static bool knob_released = false;
     float new_knob_distance = Vector2Distance(mp, Position);
     float distance = 0;
     static Vector2 knob = Position;
     Color c002 = {60, 60, 60, 25};
     Color c001 = {40, 40, 40, 40};
+    move mknobx = {knob.x, Position.x, 0.03};
+    move mknoby = {knob.y, Position.y, 0.03};
     DrawCircleV(Position, 50, c001);
     DrawCircleV({knob.x, knob.y}, 18, c002);
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) and CheckCollisionPointCircle(mp, knob, 18) and !drag){
+        if (distance < 50) knob = mp;
         drag = true;
     };
     if(drag){
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-            distance = Vector2Distance(knob, Position);
+            distance = Vector2Distance(knob + md, Position);
             
             if(distance < 50){
-                knob = md;
+                knob += md;
             }
            
             else{
@@ -188,6 +192,16 @@ void draw_joystick(Vector2 Position){
         }
         else{
             drag = false;
+            knob_released = true;
+        }
+    }
+    else{
+        if(knob_released){
+            knob.x = mknobx.update();
+            knob.y = mknoby.update();
+        }
+        else{
+            knob = Position;
         }
     }
     
