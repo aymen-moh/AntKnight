@@ -26,10 +26,8 @@ Texture2D menu_button_h;
 Texture2D lvlbg_texture;
 Texture2D logo;
 
-Texture2D player_idle_left;
-Texture2D player_idle_right;
-Texture2D player_running_left;
-Texture2D player_running_right;
+Texture2D player_idle;
+
 /////////////////////////////// COLORS
 const Color TRANSPARENT_WHITE = {255, 255, 255, 25};
 /////////////////////////////// Booleans
@@ -108,12 +106,10 @@ bool hovered(Vector2 mouse, Rectangle rect){
 }
 
 void move_player(){
-    static anima player_idle_anima = {4, 0.5};
+    static anima player_idle_anima = {4, 0.25};
     static anima player_running_anima = {4, 0.1};
     float ft = GetFrameTime();
     static bool direction = true;
-    if(IsKeyDown(KEY_D)) {player.player.x += player.speed * ft; player_state = running; direction = true;}
-    if(IsKeyDown(KEY_A)) {player.player.x -= player.speed * ft; player_state = running; direction = false;}
     if(IsKeyUp(KEY_A) and IsKeyUp(KEY_D) or IsKeyDown(KEY_A) and IsKeyDown(KEY_D)) player_state = idle;
     if(y_vel == 0) if(IsKeyPressed(KEY_SPACE)) y_vel = player.jump_vel * ft;
     player.player.y -= y_vel;
@@ -125,17 +121,115 @@ void move_player(){
     DrawRectangle(0, 510, 960, 40, LIME);
     switch(player_state){
         case idle: {
-            Texture2D current_idle = direction ? player_idle_right : player_idle_left;
-            DrawTexturePro(current_idle, player_idle_anima.anim(current_idle), player.player, {0, 0}, 0, WHITE);
-            break;
-        }
-        case running: {
-            Texture2D current_running = direction ? player_running_right : player_running_left;
-            DrawTexturePro(current_running, player_running_anima.anim(current_running), player.player, {0, 0}, 0, WHITE);
+            DrawTexturePro(player_idle, player_idle_anima.anim(player_idle), player.player, {0, 0}, 0, WHITE);
             break;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void draw_joystick(Vector2 Position){
+    Vector2 mp = GetMousePosition();
+    Vector2 md = GetMouseDelta();
+    static bool knob_can_move;
+    static bool drag = false;
+    float new_knob_distance = Vector2Distance(mp, Position);
+    float distance = 0;
+    static Vector2 knob = Position;
+    Color c002 = {60, 60, 60, 25};
+    Color c001 = {40, 40, 40, 40};
+    DrawCircleV(Position, 50, c001);
+    DrawCircleV({knob.x, knob.y}, 18, c002);
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) and CheckCollisionPointCircle(mp, knob, 18) and !drag){
+        drag = true;
+    };
+    if(drag){
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            distance = Vector2Distance(knob, Position);
+            
+            if(distance < 50){
+                knob = md;
+            }
+           
+            else{
+                knob_can_move = true;
+            }
+            DrawText(std::to_string(distance).c_str(), 100, 100, 24, BLACK);
+        }
+        else{
+            drag = false;
+        }
+    }
+    
+
+} // i am trying to figure out a way to add bow aiming, i have changed my mind about the style of gameplay.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 int main(int argc, char* argv[]){
     ////////////////////////////VARIABLES////////////////////////////////////
@@ -158,10 +252,7 @@ int main(int argc, char* argv[]){
     logo = LoadTexture("Assets/Texture/gui/logo.png");
     bg_lvl = LoadTexture("Assets/Texture/textures/lvl_bg.png"); 
 
-    player_idle_left = LoadTexture("Assets/Texture/entities/player/player_idle_left.png");
-    player_idle_right = LoadTexture("Assets/Texture/entities/player/player_idle_right.png");
-    player_running_left = LoadTexture("Assets/Texture/entities/player/player_running_left.png");
-    player_running_right = LoadTexture("Assets/Texture/entities/player/player_running_right.png");
+    player_idle = LoadTexture("Assets/Texture/entities/player/player_idle.png");
     Rectangle play_button_rect = {500, 250, 64, 64};
     Rectangle quit_button_rect = {350, 250, 64, 64};
     Rectangle menu_button_rect = {425, 250, 64, 64};
@@ -214,6 +305,7 @@ int main(int argc, char* argv[]){
             case game: {
                 DrawTexturePro(bg_lvl, {0, 0, 160, 90}, {0, 0, 960, 540}, {0, 0}, 0, WHITE);
                 move_player();
+                draw_joystick({width/2, height/2});
                 break;
             }
         };
